@@ -1,0 +1,1 @@
+Note that this code may take a long time to run! It is meant to simulate running every possible tournament in every possible ordering to determine whether that tournament is manipulable by any two teams. This code could be improved by taking advantage of certain symmetries in starting position, though finding these symmetries may be somewhat difficult.
