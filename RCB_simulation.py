@@ -231,14 +231,14 @@ def testAll4PlayerMatrices(prizeVec):
         # or whether they can gain more than 1/3 on average by colluding
         numManipArrNorm = numManipArr / numOrderings
         for i in range(0, numPairs):
-            if numManipArrNorm[i] > 1 / 3:
+            if numManipArrNorm[i] >= 1 / 3:
                 print("The following tournament was manipulable by > 1/3")
                 print("matrix: \n", matrix)
                 print("prize vector:", prizeVec)
                 print("manipulation array:", numManipArr)
                 print("normalized manipulation array:", numManipArrNorm)
                 print("gain vector:", gainArr)
-            elif gainArr[i] > 1 / 3:
+            elif gainArr[i] >= 1 / 3:
                 print("The following tournament had a pairing that gained > 1/3")
                 print("matrix: \n", matrix)
                 print("prize vector:", prizeVec)
@@ -306,19 +306,107 @@ def testAllNPlayerMatrices(n, prizeVec):
                 print("manipulation array:", numManipArr)
                 print("normalized manipulation array:", numManipArrNorm)
                 print("gain vector:", gainArr)
-                
+
+
+def testNPlayerMatricesManyPrizes(n, prizeVecArr):
+    matrix = np.array(np.zeros((n, n), dtype=int))
+    # initialize: higher numbered players beat lower numbered players
+    #for i in range(0, 4):
+    #    for j in range(i+1, 4):
+    #        matrix.itemset((j, i), 0)
+
+    # try base matrix
+    
+            
+    # try all possible tournaments
+    # each tournament can be thought of as a 4 choose 2 (=6) length bit string
+    numPairs = int((n * (n - 1)) / 2)
+    numPossibleTournaments = int(math.pow(2, numPairs))
+    numOrderings = math.factorial(n)
+
+    #print(numPossibleTournaments)
+    for numTourney in range(0, numPossibleTournaments):
+        #print(numTourney)
+        #print(toBinStr(numTourney, numPairs))
+        binStr = toBinStr(numTourney, numPairs)
+        # form matrix
+        index = 0
+        for i in range(0, n):
+            for j in range(i+1, n):
+                item = int(binStr[index])
+                matrix.itemset((i, j), item)
+                if item == 1:
+                    matrix.itemset((j, i), 0)
+                else:
+                    matrix.itemset((j, i), 1)
+
+                index += 1
         
+        #print(matrix)
+        # test if this tournament is manipulable under this prize vector
+        for prizeVec in prizeVecArr:
+            tournament = Tournament(n, matrix)
+            numManipArr, gainArr =  testManipulable(tournament, prizeVec)
+            #print(numManipArr)
+            #print(gainArr)
+
+            # check if any of the pairs can collude more than 1/3 of the time
+            # or whether they can gain more than 1/3 on average by colluding
+            numManipArrNorm = numManipArr / numOrderings
+            for i in range(0, numPairs):
+                if numManipArrNorm[i] > 1 / 3:
+                    print("The following tournament was manipulable by > 1/3")
+                    print("matrix: \n", matrix)
+                    print("prize vector:", prizeVec)
+                    print("manipulation array:", numManipArr)
+                    print("normalized manipulation array:", numManipArrNorm)
+                    print("gain vector:", gainArr, flush=True)
+                elif gainArr[i] > 1 / 3:
+                    print("The following tournament had a pairing that gained > 1/3")
+                    print("matrix: \n", matrix)
+                    print("prize vector:", prizeVec)
+                    print("manipulation array:", numManipArr)
+                    print("normalized manipulation array:", numManipArrNorm)
+                    print("gain vector:", gainArr, flush=True)
+
+# make a bunch of prize vectors
+# num > 5
+def makePrizeVecArr(n, num):
+    # make some basic prize vectors
+    prizeVecs = np.ones((num, n))
+    firstVec = np.ones(n)
+    for i in range(0, (n // 2) -1):
+        firstVec.itemset(n - i - 1, 0)
+    #print(firstVec)
+    prizeVecs[0] =  firstVec
+    #print(prizeVecs)
+    secondVec = np.ones(n)
+    for i in range(0, (n//2) +1):
+        secondVec.itemset(n - i - 1, 0)
+    prizeVecs[1] = secondVec
+    prizeVecs[2] = makeBordaVec(n)
+
+    #generate some random vectors
+    for i in range(0, num - 3):
+        prizeVecs[i+3] = getRandPrizeVector(n)
+    return prizeVecs
+
+def makeBordaVec(n):
+    borda = np.ones(n)
+    for i in range(0, n):
+        borda.itemset(i, (n - i - 1) / (n - 1))
+    return borda
             
 
 if __name__ == "__main__":
     # basic testing
-    n= 4
-    t = Tournament(n, np.array([[0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [1, 0, 1, 1]]))
+    n= 8
+    #t = Tournament(n, np.array([[0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [1, 0, 1, 1]]))
 
-    for i in range(0,n):
-        for j in range(0, n):
-            if i != j:
-                t.beats(i, j)
+    #for i in range(0,n):
+    #    for j in range(0, n):
+    #        if i != j:
+    #            t.beats(i, j)
     #print("Matrix:\n", t.rankingMatrix)
     #print("prize vector: ", getRandPrizeVector(n))
 
@@ -333,7 +421,17 @@ if __name__ == "__main__":
 
     #print("manipulability numbers", manipNums)
     #print("gains", gains)
-    #testAll4PlayerMatrices([1, 0, 0, 0])
-    testAllNPlayerMatrices(8, [1, 0, 0, 0, 0, 0, 0, 0])
+    #testAll4PlayerMatrices(makeBordaVec(4))
+    #testAllNPlayerMatrices(8, [1, 0, 0, 0, 0, 0, 0, 0])
+    #makePrizeVecArr(8, 5)
+    #makeBordaVec(8)
+    #print(makePrizeVecArr(8, 5))
+
+    # n must be a power of 2
+    # num_trials must be greater than 3
+    n = 8
+    num_trials = 10
+    testNPlayerMatricesManyPrizes(n, makePrizeVecArr(n, 5))
+    
     
     
