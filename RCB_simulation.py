@@ -291,7 +291,9 @@ def testNPlayerMatricesManyPrizes(n, prizeVecArr):
 
                 index += 1
         
+        #count = 1
         # test if this tournament is manipulable under this prize vector
+
         for prizeVec in prizeVecArr:
             tournament = Tournament(n, matrix)
             numManipArr, gainArr =  testManipulable(tournament, prizeVec)
@@ -314,6 +316,9 @@ def testNPlayerMatricesManyPrizes(n, prizeVecArr):
                     print("manipulation array:", numManipArr)
                     print("normalized manipulation array:", numManipArrNorm)
                     print("gain vector:", gainArr, flush=True)
+            #print("Done with prize vector", count, " of ", len(prizeVecArr))
+            #count += 1
+        print("Done with tournament", numTourney, "of", numPossibleTournaments)
 
 # make a bunch of prize vectors
 # num > 3
@@ -345,8 +350,8 @@ def makeBordaVec(n):
 if __name__ == "__main__":
     # basic testing
     n = 4
-    num_trials = 10
-    testNPlayerMatricesManyPrizes(n, makePrizeVecArr(n, 10))
+    num_trials = 1000
+    testNPlayerMatricesManyPrizes(n, makePrizeVecArr(n, num_trials))
     
     
     
